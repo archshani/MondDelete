@@ -1,0 +1,13 @@
+## Interface: 30400
+## Title: MondDelete Pro
+## Notes: Auto delete junk items by blacklist
+## Author: Marusp
+## Version: 9.6
+## SavedVariables: MondDeleteDB
+
+MondDelete.lua
+Tabs\Bags.lua
+Tabs\Items.lua
+Tabs\Stats.lua
+Tabs\Settings.lua
+Tabs\About.lua
