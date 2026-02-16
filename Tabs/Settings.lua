@@ -1,4 +1,4 @@
-﻿-------------------------------------------------
+-------------------------------------------------
 -- SETTINGS + CORE (Top-5 Languages, Profiles, Hooks)
 -- NOTE: Bags.lua is read-only. This file owns: locale, profiles, deletion hooks, settings UI.
 -------------------------------------------------
@@ -120,9 +120,12 @@ function Pro:InitLocale()
             SET_CHATLOG="Write deleted items to chat",
             SET_CONFIRM_START="Confirm START",
             SET_CONFIRM_EACH="Confirm each item",
+            SET_TIP_CONFIRM_EACH="Shows a confirmation popup for every single item before it is deleted.",
             SET_TIP_START="Enables/disables deletion.",
             SET_TIP_CHAT="Prints one line per deletion.",
             SET_TIP_STARTCONF="Shows a confirmation with the list of items before enabling.",
+            SET_SILENTMODE="Silent Mode",
+            SET_TIP_SILENTMODE="Hides all chat messages from the addon.",
 
             -- popups
             POP_CONFIRM_TEXT="Enable for profile: %s\n\nItems in list:\n%s",
@@ -184,9 +187,12 @@ function Pro:InitLocale()
             SET_CHATLOG="Écrire les suppressions dans le chat",
             SET_CONFIRM_START="Confirmer START",
             SET_CONFIRM_EACH="Confirmer chaque objet",
+            SET_TIP_CONFIRM_EACH="Affiche une fenêtre de confirmation pour chaque objet avant sa suppression.",
             SET_TIP_START="Active/désactive la suppression.",
             SET_TIP_CHAT="1 ligne par suppression.",
             SET_TIP_STARTCONF="Affiche la liste avant d'activer.",
+            SET_SILENTMODE="Mode silencieux",
+            SET_TIP_SILENTMODE="Masque tous les messages de l'addon dans le chat.",
 
             POP_CONFIRM_TEXT="Activer pour le profil : %s\n\nObjets dans la liste :\n%s",
             POP_DELETE_TEXT="Supprimer %dx %s ?",
@@ -245,9 +251,12 @@ function Pro:InitLocale()
             SET_CHATLOG="Gelöschte Items im Chat anzeigen",
             SET_CONFIRM_START="START bestätigen",
             SET_CONFIRM_EACH="Jedes Item bestätigen",
+            SET_TIP_CONFIRM_EACH="Zeigt für jedes einzelne Item ein Bestätigungsfenster an, bevor es gelöscht wird.",
             SET_TIP_START="Aktiviert/Deaktiviert Löschen.",
             SET_TIP_CHAT="1 Zeile pro Löschung.",
             SET_TIP_STARTCONF="Zeigt Liste vor Aktivierung.",
+            SET_SILENTMODE="Stiller Modus",
+            SET_TIP_SILENTMODE="Blendet alle Chat-Nachrichten des Addons aus.",
 
             POP_CONFIRM_TEXT="Aktivieren für Profil: %s\n\nItems in Liste:\n%s",
             POP_DELETE_TEXT="%dx %s löschen?",
@@ -306,9 +315,12 @@ function Pro:InitLocale()
             SET_CHATLOG="Escribir borrados en el chat",
             SET_CONFIRM_START="Confirmar START",
             SET_CONFIRM_EACH="Confirmar cada objeto",
+            SET_TIP_CONFIRM_EACH="Muestra una ventana de confirmación para cada objeto antes de borrarlo.",
             SET_TIP_START="Activa/Desactiva el borrado.",
             SET_TIP_CHAT="1 línea por borrado.",
             SET_TIP_STARTCONF="Muestra la lista antes de activar.",
+            SET_SILENTMODE="Modo silencioso",
+            SET_TIP_SILENTMODE="Oculta todos los mensajes del addon en el chat.",
 
             POP_CONFIRM_TEXT="Activar para perfil: %s\n\nObjetos en la lista:\n%s",
             POP_DELETE_TEXT="¿Borrar %dx %s?",
@@ -367,9 +379,12 @@ function Pro:InitLocale()
             SET_CHATLOG="Scrivi eliminazioni in chat",
             SET_CONFIRM_START="Conferma START",
             SET_CONFIRM_EACH="Conferma ogni oggetto",
+            SET_TIP_CONFIRM_EACH="Mostra un popup di conferma per ogni singolo oggetto prima che venga eliminato.",
             SET_TIP_START="Abilita/Disabilita eliminazione.",
             SET_TIP_CHAT="1 riga per eliminazione.",
             SET_TIP_STARTCONF="Mostra la lista prima di attivare.",
+            SET_SILENTMODE="Modalità silenziosa",
+            SET_TIP_SILENTMODE="Nasconde tutti i messaggi dell'addon nella chat.",
 
             POP_CONFIRM_TEXT="Abilitare per profilo: %s\n\nOggetti in lista:\n%s",
             POP_DELETE_TEXT="Eliminare %dx %s ?",
@@ -402,6 +417,7 @@ function Pro:EnsureDB()
     if MondDeleteDB.settings.chatLog == nil then MondDeleteDB.settings.chatLog = true end
     if MondDeleteDB.settings.confirmStart == nil then MondDeleteDB.settings.confirmStart = false end
     if MondDeleteDB.settings.confirmEach == nil then MondDeleteDB.settings.confirmEach = false end
+    if MondDeleteDB.settings.silentMode == nil then MondDeleteDB.settings.silentMode = false end
 
     -- Profiles
     MondDeleteDB.profiles = MondDeleteDB.profiles or {}
@@ -504,7 +520,9 @@ function Pro:SetProfile(name)
     MondDeleteDB.profile = name
     self:SyncActivePointers()
 
-    MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("SET_PROFILE_CHANGED"), name))
+    if not MondDeleteDB.settings.silentMode then
+        MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("SET_PROFILE_CHANGED"), name))
+    end
     self:RefreshUI(false)
 end
 
@@ -599,7 +617,9 @@ function Pro:SetLanguage(lang, langText)
     if not self.translations[lang] then lang = "enUS" end
     MondDeleteDB.settings.lang = lang
 
-    MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("LANG_CHANGED"), langText or lang))
+    if not MondDeleteDB.settings.silentMode then
+        MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("LANG_CHANGED"), langText or lang))
+    end
     self:RefreshUI(true)
 end
 
@@ -627,7 +647,9 @@ function Pro:AddItemToList(itemID, link)
 
     MondDeleteDB.items[itemID] = true
     local label = MD_MakeItemLink(itemID, link)
-    MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("ITEMS_ADDED"), label))
+    if not MondDeleteDB.settings.silentMode then
+        MD_Chat(string.format("|cff00ff00[MondDelete]|r " .. self:L("ITEMS_ADDED"), label))
+    end
 
     self:RefreshUI(false)
 end
@@ -788,7 +810,7 @@ function Pro:RecordDeletion(itemID, count, link)
     if #self._session.history > 200 then table.remove(self._session.history, 1) end
 
    -- optional chat log (ONE line only, no spam)
-if settings.chatLog then
+if settings.chatLog and not settings.silentMode then
     self._chatDelGuard = self._chatDelGuard or {}
 
     local now2 = MD_Now()
@@ -968,7 +990,9 @@ function Pro:InstallHooks()
             local now = MD_Now()
             if not Pro._disabledWarn or (now - Pro._disabledWarn) > 2 then
                 Pro._disabledWarn = now
-                MD_Chat(Pro:L("MSG_DISABLED"))
+                if not MondDeleteDB.settings.silentMode then
+                    MD_Chat(Pro:L("MSG_DISABLED"))
+                end
             end
             return
         end
@@ -1183,6 +1207,10 @@ function(p)
         if not slot then
             local cb = CreateFrame("CheckButton", nil, p, "UICheckButtonTemplate")
             cb:SetPoint("TOPLEFT", 10, y)
+
+            cb.text = cb:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            cb.text:SetPoint("LEFT", cb, "RIGHT", 5, 1)
+
             cb:SetScript("OnEnter", function(self)
                 local tip = tipKey and Pro:L(tipKey) or ""
                 if tip ~= "" then
@@ -1206,7 +1234,8 @@ function(p)
 
     addCB(1, -150, "chatLog", "SET_TIP_CHAT")
     addCB(2, -176, "confirmStart", "SET_TIP_STARTCONF")
-    addCB(3, -202, "confirmEach", nil)
+    addCB(3, -202, "confirmEach", "SET_TIP_CONFIRM_EACH")
+    addCB(4, -228, "silentMode", "SET_TIP_SILENTMODE")
 
     Pro.SettingsRefresh(p)
 end,
@@ -1261,11 +1290,12 @@ function Pro.SettingsRefresh(p)
 
     -- checkbox texts + states
     if p.cbs then
-        -- order: chatLog, confirmStart, confirmEach
+        -- order: chatLog, confirmStart, confirmEach, silentMode
         local map = {
             [1] = { textKey="SET_CHATLOG", settingKey="chatLog" },
             [2] = { textKey="SET_CONFIRM_START", settingKey="confirmStart" },
             [3] = { textKey="SET_CONFIRM_EACH", settingKey="confirmEach" },
+            [4] = { textKey="SET_SILENTMODE", settingKey="silentMode" },
         }
         for idx, v in pairs(map) do
             local slot = p.cbs[idx]
