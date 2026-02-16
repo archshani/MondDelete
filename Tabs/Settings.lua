@@ -120,6 +120,7 @@ function Pro:InitLocale()
             SET_CHATLOG="Write deleted items to chat",
             SET_CONFIRM_START="Confirm START",
             SET_CONFIRM_EACH="Confirm each item",
+            SET_TIP_CONFIRM_EACH="Shows a confirmation popup for every single item before it is deleted.",
             SET_TIP_START="Enables/disables deletion.",
             SET_TIP_CHAT="Prints one line per deletion.",
             SET_TIP_STARTCONF="Shows a confirmation with the list of items before enabling.",
@@ -186,6 +187,7 @@ function Pro:InitLocale()
             SET_CHATLOG="Écrire les suppressions dans le chat",
             SET_CONFIRM_START="Confirmer START",
             SET_CONFIRM_EACH="Confirmer chaque objet",
+            SET_TIP_CONFIRM_EACH="Affiche une fenêtre de confirmation pour chaque objet avant sa suppression.",
             SET_TIP_START="Active/désactive la suppression.",
             SET_TIP_CHAT="1 ligne par suppression.",
             SET_TIP_STARTCONF="Affiche la liste avant d'activer.",
@@ -249,6 +251,7 @@ function Pro:InitLocale()
             SET_CHATLOG="Gelöschte Items im Chat anzeigen",
             SET_CONFIRM_START="START bestätigen",
             SET_CONFIRM_EACH="Jedes Item bestätigen",
+            SET_TIP_CONFIRM_EACH="Zeigt für jedes einzelne Item ein Bestätigungsfenster an, bevor es gelöscht wird.",
             SET_TIP_START="Aktiviert/Deaktiviert Löschen.",
             SET_TIP_CHAT="1 Zeile pro Löschung.",
             SET_TIP_STARTCONF="Zeigt Liste vor Aktivierung.",
@@ -312,6 +315,7 @@ function Pro:InitLocale()
             SET_CHATLOG="Escribir borrados en el chat",
             SET_CONFIRM_START="Confirmar START",
             SET_CONFIRM_EACH="Confirmar cada objeto",
+            SET_TIP_CONFIRM_EACH="Muestra una ventana de confirmación para cada objeto antes de borrarlo.",
             SET_TIP_START="Activa/Desactiva el borrado.",
             SET_TIP_CHAT="1 línea por borrado.",
             SET_TIP_STARTCONF="Muestra la lista antes de activar.",
@@ -375,6 +379,7 @@ function Pro:InitLocale()
             SET_CHATLOG="Scrivi eliminazioni in chat",
             SET_CONFIRM_START="Conferma START",
             SET_CONFIRM_EACH="Conferma ogni oggetto",
+            SET_TIP_CONFIRM_EACH="Mostra un popup di conferma per ogni singolo oggetto prima che venga eliminato.",
             SET_TIP_START="Abilita/Disabilita eliminazione.",
             SET_TIP_CHAT="1 riga per eliminazione.",
             SET_TIP_STARTCONF="Mostra la lista prima di attivare.",
@@ -1202,6 +1207,10 @@ function(p)
         if not slot then
             local cb = CreateFrame("CheckButton", nil, p, "UICheckButtonTemplate")
             cb:SetPoint("TOPLEFT", 10, y)
+
+            cb.text = cb:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            cb.text:SetPoint("LEFT", cb, "RIGHT", 5, 1)
+
             cb:SetScript("OnEnter", function(self)
                 local tip = tipKey and Pro:L(tipKey) or ""
                 if tip ~= "" then
@@ -1225,7 +1234,7 @@ function(p)
 
     addCB(1, -150, "chatLog", "SET_TIP_CHAT")
     addCB(2, -176, "confirmStart", "SET_TIP_STARTCONF")
-    addCB(3, -202, "confirmEach", nil)
+    addCB(3, -202, "confirmEach", "SET_TIP_CONFIRM_EACH")
     addCB(4, -228, "silentMode", "SET_TIP_SILENTMODE")
 
     Pro.SettingsRefresh(p)
