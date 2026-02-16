@@ -30,9 +30,14 @@ local function InitDB()
         chatLog       = true,
         confirmStart  = true,
         confirmEach   = false,
+        silentMode    = false,
         safeMode      = true,   -- не удалять rare+
         ignoreEquipped= true,   -- не удалять экипированное
     }
+
+    if MondDeleteDB.settings.silentMode == nil then
+        MondDeleteDB.settings.silentMode = false
+    end
 
     -- enabled flag (backward compatible with older SavedVariables)
     if MondDeleteDB.settings.enabled == nil then
@@ -188,7 +193,7 @@ local function RunDeleteEngine()
         if count >= 33 then break end
     end
 
-    if MondDeleteDB.settings.chatLog and next(deletedThisRun) then
+    if not MondDeleteDB.settings.silentMode and MondDeleteDB.settings.chatLog and next(deletedThisRun) then
         -- выводим только один раз за один запуск
         local output = {}
         for itemID, count in pairs(deletedThisRun) do
@@ -219,7 +224,7 @@ function ContainerFrameItemButton_OnModifiedClick(self, button)
             MondDeleteDB.items[itemID] = true
 
             local link = GetItemInfo(itemID)
-            if link and MondDeleteDB.settings.chatLog then
+            if link and not MondDeleteDB.settings.silentMode and MondDeleteDB.settings.chatLog then
                 print("|cff00ff00[MondDelete]|r Added to delete list: "..link)
             end
 
@@ -258,7 +263,9 @@ e:SetScript("OnEvent", function(_, ev, arg)
     if ev == "ADDON_LOADED" and arg == addonName then
         InitDB()
         BuildTabButtons()
-        print(prefix.."loaded. Type |cff00ff00/md|r")
+        if not MondDeleteDB.settings.silentMode then
+            print(prefix.."loaded. Type |cff00ff00/md|r")
+        end
     elseif ev == "BAG_UPDATE" and MondDeleteDB and MondDeleteDB.settings and MondDeleteDB.settings.enabled then
         RunDeleteEngine()
     end
