@@ -152,9 +152,15 @@ end
 -------------------------------------------------
 local function RunDeleteEngine()
     if isDeleting then return end
+
+    local now = GetTime()
+    if now - lastDeleteTime < 1 then return end
+    lastDeleteTime = now
+
     isDeleting = true
 
     local deletedThisRun = {}
+    local count = 0
 
     for bag = 0, 4 do
         if MondDeleteDB.bags[bag] then
@@ -173,9 +179,13 @@ local function RunDeleteEngine()
                         (MondDeleteDB.stats.itemCounts[itemID] or 0) + 1
                     deletedThisRun[itemID] =
                         (deletedThisRun[itemID] or 0) + 1
+
+                    count = count + 1
+                    if count >= 33 then break end
                 end
             end
         end
+        if count >= 33 then break end
     end
 
     if MondDeleteDB.settings.chatLog and next(deletedThisRun) then
